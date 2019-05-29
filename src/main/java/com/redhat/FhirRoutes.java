@@ -23,7 +23,7 @@ public class FhirRoutes extends RouteBuilder {
 		
 		KafkaComponent kafka = new KafkaComponent();		
 		KafkaConfiguration kafkaConfig = new KafkaConfiguration();
-		kafkaConfig.setBrokers("my-cluster-kafka-bootstrap-fhir-amq.192.168.64.2.nip.io:443");
+		kafkaConfig.setBrokers("my-cluster-kafka-bootstrap-fhir-amq.apps.akrohg-openshift.redhatgov.io:443");
 		kafkaConfig.setSecurityProtocol("SSL");
 		kafkaConfig.setSslTruststoreLocation("src/main/resources/keystore.jks");
 		kafkaConfig.setSslTruststorePassword("password");
