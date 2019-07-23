@@ -43,6 +43,6 @@ public class FhirRoutes extends RouteBuilder {
 				}
 			}).recipientList(simple("kafka:${exchangeProperty.topic}")).setBody(constant("Message sent successfully."));    
 		
-		from("timer://foo?period=10s").log("hello");
+		from("timer://foo?period=10s").to("http://localhost:8080/randomMessage/xml").log(simple("${body}").toString());
 	}
 }
