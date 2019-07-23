@@ -21,15 +21,8 @@ public class FhirRoutes extends RouteBuilder {
 	public void configure() throws Exception {
 		restConfiguration().component("servlet").bindingMode(RestBindingMode.json);
 		
-		KafkaComponent kafka = new KafkaComponent();		
-		KafkaConfiguration kafkaConfig = new KafkaConfiguration();
-		kafkaConfig.setBrokers("my-cluster-kafka-bootstrap-fhir-amq.apps.akrohg-openshift.redhatgov.io:443");
-		kafkaConfig.setSecurityProtocol("SSL");
-		kafkaConfig.setSslTruststoreLocation("src/main/resources/keystore.jks");
-		kafkaConfig.setSslTruststorePassword("password");
-		kafka.setConfiguration(kafkaConfig);
-		
-		getContext().addComponent("kafka", kafka);
+//		KafkaComponent kafka = new KafkaComponent();			
+//		getContext().addComponent("kafka", kafka);
 		
 		// "passthrough" kafka producer. Takes FHIR messages through RESTful API endpoint 
 		// and forwards them directly to kafka, using the topic indicated by the resourceType
@@ -37,30 +30,19 @@ public class FhirRoutes extends RouteBuilder {
 			.post("/fhir").route().streamCaching().process(new Processor() {
 				@Override
 				public void process(Exchange exchange) throws Exception {
+					String kafkaTopic = "my-topic";
 					Message message = exchange.getIn();
-					String resourceType = message.getBody(Map.class).get("resourceType").toString().toLowerCase();
 					
 					log.info("Received FHIR message: {}", message.getBody(String.class));
-					exchange.setProperty("topic", resourceType);
-					log.info("Sending to kafka using topic: {}", resourceType);
+					exchange.setProperty("topic", kafkaTopic);
+					log.info("Sending to kafka using topic: {}", kafkaTopic);
 					
 					message.setBody(new ObjectMapper().writeValueAsString(exchange.getIn().getBody()));
 					message.setHeader(KafkaConstants.PARTITION_KEY, 0);
 					message.setHeader(KafkaConstants.KEY, "Camel");
 				}
-			}).recipientList(simple("kafka:${exchangeProperty.topic}")).setBody(constant("Message sent successfully."));
+			}).recipientList(simple("kafka:${exchangeProperty.topic}")).setBody(constant("Message sent successfully."));    
 		
-		
-		// Consumer for messages which correspond to the "condition" kafka topic
-		from("kafka:condition")
-			.streamCaching()
-			.log("Message received from Kafka : ${body}")
-		    .log("    on the topic ${headers[kafka.TOPIC]}")
-		    .log("    on the partition ${headers[kafka.PARTITION]}")
-		    .log("    with the offset ${headers[kafka.OFFSET]}")
-		    .log("    with the key ${headers[kafka.KEY]}")
-		    .unmarshal().json(JsonLibrary.Jackson, Map.class)
-		    .log("Initiating PAM task to handle condition for patient ${body[subject][reference]}");
-		    
+		from("timer://foo?period=10s").log("hello");
 	}
 }
