@@ -42,7 +42,7 @@ public class FhirRoutes extends RouteBuilder {
 //		from("timer://foo?period=10s").to("http://localhost:8080/randomMessage/xml").unmarshal().jacksonxml().log(simple("${body[result]}").toString());
 		
 		
-		from("timer://foo?period={{message.interval}}").to("{{xmlAppUrl}}").unmarshal().jacksonxml().process(new Processor() {
+		from("timer://fuse-kafka-producer?period={{message.interval}}").to("{{xmlAppUrl}}").unmarshal().jacksonxml().process(new Processor() {
 			@Override
 			public void process(Exchange exchange) throws Exception {
 				Message message = exchange.getIn();
