@@ -42,7 +42,7 @@ public class FhirRoutes extends RouteBuilder {
 //		from("timer://foo?period=10s").to("http://localhost:8080/randomMessage/xml").unmarshal().jacksonxml().log(simple("${body[result]}").toString());
 		
 		
-		from("timer://foo?period=10s").to("{{xmlAppUrl}}").unmarshal().jacksonxml().process(new Processor() {
+		from("timer://foo?period={{message.interval}}").to("{{xmlAppUrl}}").unmarshal().jacksonxml().process(new Processor() {
 			@Override
 			public void process(Exchange exchange) throws Exception {
 				Message message = exchange.getIn();
@@ -51,7 +51,7 @@ public class FhirRoutes extends RouteBuilder {
 				message.setHeader(KafkaConstants.PARTITION_KEY, 0);
 				message.setHeader(KafkaConstants.KEY, "Camel");
 				
-				log.info("Sending the following message to Kafka topic: "+ (message.getBody(Map.class).get("result")).toString());
+				log.info("Sending the following message to Kafka topic: {}", message.getBody(String.class));
 			}
 		}).recipientList(simple("kafka:my-topic?sslTruststoreLocation={{spring.kafka.properties.ssl.truststore.location}}&" 
 	            + "sslTruststorePassword={{spring.kafka.properties.ssl.truststore.password}}&"
