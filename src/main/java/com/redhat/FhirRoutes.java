@@ -51,7 +51,7 @@ public class FhirRoutes extends RouteBuilder {
 				message.setHeader(KafkaConstants.PARTITION_KEY, 0);
 				message.setHeader(KafkaConstants.KEY, "Camel");
 			}
-		}).recipientList(simple("kafka:my-topic?sslTruststoreLocation={{sslTruststoreLocation}}&" 
+		}).recipientList(simple("kafka:my-topic?sslTruststoreLocation={{spring.kafka.properties.ssl.truststore.location}}&" 
 	            + "sslTruststorePassword={{spring.kafka.properties.ssl.truststore.password}}&"
 				+ "securityProtocol={{spring.kafka.properties.security.protocol}}")).setBody(constant("Message sent successfully."));
 	}
